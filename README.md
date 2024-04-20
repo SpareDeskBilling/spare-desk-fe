@@ -1,2 +1,2 @@
 # spare-desk-fe
-FE for spare desk application
+FE for spare desk website

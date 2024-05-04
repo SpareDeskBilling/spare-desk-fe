@@ -108,7 +108,7 @@ const AddSpareParts: FC<AddSparePartsProps> = (props) => {
                 setValue={setValue}
                 reset={reset}
                 handleCancel={handleCancel}
-                isUpdatingDetails={false}
+                isUpdatingDetails={addSparePartsResponse.isLoading}
               />
             </div>
           </div>

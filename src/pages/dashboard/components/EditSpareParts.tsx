@@ -129,7 +129,7 @@ const EditSpareParts: FC<AddSparePartsProps> = (props) => {
                 setValue={setValue}
                 reset={reset}
                 handleCancel={handleCancel}
-                isUpdatingDetails={false}
+                isUpdatingDetails={editSparePartsResponse.isLoading}
                 isEdit={true}
                 partDetails={partDetails}
               />

@@ -1,13 +1,45 @@
-import { BetaLogo, HamburgerMenu, HomeIcon } from 'assets/icons';
+import { HamburgerMenu, HomeIcon, SummaryIcon } from 'assets/icons';
 import COLORS from 'constants/colors';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+
+const NAV_BAR_CONSTANTS = [
+  {
+    navText: 'Home',
+    icon: HomeIcon,
+    path: '/home',
+    iconDefaultFill: 'transparent',
+    iconSelectedFill: COLORS.PRIMARY_COLOR,
+    iconDefaultStroke: COLORS.SLATE_GREY,
+    iconSelectedStroke: 'transparent',
+    dataTestId: 'home',
+    hideOnProfessionalView: false
+  },
+  {
+    navText: 'Billing',
+    icon: SummaryIcon,
+    path: '/billing',
+    iconDefaultFill: 'transparent',
+    iconSelectedFill: COLORS.PRIMARY_COLOR,
+    iconDefaultStroke: COLORS.SLATE_GREY,
+    iconSelectedStroke: COLORS.WHITE,
+    dataTestId: 'billing',
+    hideOnProfessionalView: false
+  }]
 
 const LeftNav = () => {
   const [selectedTab, setSelectedTab] = useState('');
 
 
   const navigate = useNavigate();
+  const { hash } = window.location;
+
+  useEffect(() => {
+    const baseHash = hash?.split('/')[1];
+    let activeTab = '';
+    activeTab = baseHash?.split('?')[0];
+    setSelectedTab(activeTab ? `/${activeTab}` : NAV_BAR_CONSTANTS[0]?.path);
+  }, [hash]);
 
   const handleMenuClick = () => { };
   const isNavOpen = true;
@@ -16,19 +48,6 @@ const LeftNav = () => {
     if (isNavOpen) return 'visible';
     return 'hidden';
   }, [isNavOpen]);
-
-  const NAV_BAR_CONSTANTS = [
-    {
-      navText: 'Dashboard',
-      icon: HomeIcon,
-      path: '/dashboard',
-      iconDefaultFill: 'transparent',
-      iconSelectedFill: COLORS.PRIMARY_COLOR,
-      iconDefaultStroke: COLORS.SLATE_GREY,
-      iconSelectedStroke: 'transparent',
-      dataTestId: 'dashboard',
-      hideOnProfessionalView: false
-    },]
 
   const handleSelectedTab = (event, tab: string) => {
 
@@ -49,7 +68,9 @@ const LeftNav = () => {
           className={`flex flex-row ${isNavOpen ? 'justify-between' : 'justify-center'
             } items-center mx-4 mb-8`}>
           <div className={getVisibility()}>
-            <BetaLogo />
+            <span className="text-primaryColor text-xl font-extrabold font-[cursive]">
+              MULTI TECH
+            </span>
           </div>
           <HamburgerMenu
             className="cursor-pointer"

@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import Dashboard from "pages/dashboard/Dashboard";
 import LeftNav from 'components/leftNav/LeftNav';
+import Billing from 'pages/billing/Billing';
 
 const PrivateLayout = () => {
 
@@ -33,6 +34,7 @@ const PrivateLayout = () => {
         {/* <div className='flex w-full h-full'> */}
         <Routes>
           <Route path='/home' element={<Dashboard />} />
+          <Route path='/billing' element={<Billing />} />
           <Route
             path='/'
             element={<Navigate replace to='/home' />}

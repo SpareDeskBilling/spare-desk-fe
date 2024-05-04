@@ -2,7 +2,7 @@ import baseApi from "services/api";
 import { AddSparePartsPayload, AddSparePartsResponse, EditSparePartsPayload, EditSparePartsResponse, PartDetails } from "./types";
 import { GenericApiResponse } from "types/generalTypes";
 
-const mockData: PartDetails[] = [{
+export const mockData: PartDetails[] = [{
   sku: "001",
   name: "Bolt",
   qty: '25',
@@ -25,7 +25,7 @@ const mockData: PartDetails[] = [{
   name: "Oil Filer",
   qty: '5',
   dealerPrice: '25.98',
-  mrp: '40',
+  mrp: '80',
   location: "",
   model: ""
 }]

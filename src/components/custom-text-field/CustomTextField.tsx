@@ -75,11 +75,12 @@ const CustomTextField: FC<CustomTextFieldProps & TextFieldProps> = props => {
     multiline,
     type = 'text',
     errors,
-    onCut = () => {},
-    onCopy = () => {},
-    onPaste = () => {},
+    onCut = () => { },
+    onCopy = () => { },
+    onPaste = () => { },
     isDisabled = false,
-    wrapperClass = ''
+    wrapperClass = '',
+    onChange = () => { }
   } = props;
 
   // seperating out customClass from props, because MUI textField doesn't support customClass as a prop
@@ -121,6 +122,10 @@ const CustomTextField: FC<CustomTextFieldProps & TextFieldProps> = props => {
             disabled={isDisabled}
             sx={{ ...(startAdornment && startAdornmentSx), ...customClass }}
             {...field}
+            onChange={(e) => {
+              field.onChange(e);
+              onChange(e);
+            }}
           />
           {showStartAdornment && (
             <div className="flex absolute top-0 justify-center items-center px-4 h-[54px] border-r border-greyCloud">

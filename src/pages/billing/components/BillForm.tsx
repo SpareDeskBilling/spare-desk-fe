@@ -1,30 +1,48 @@
-import { Button, TextField } from 'components';
+import { AutocompleteDropdown, Button, TextField } from 'components';
 import { Grid, useMediaQuery, useTheme } from '@mui/material';
-import React, { FC } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { BillFormProps, FormFieldValues } from './types';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
+import { debounce } from 'lodash';
+import { PartDetails } from 'pages/dashboard/types';
 
 const BillForm: FC<BillFormProps> = (props) => {
-  const { isGenerating } = props;
+  const { isGenerating, getSparePartsListByName, spareData } = props;
+
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
   const theme = useTheme();
   const match = useMediaQuery(theme.breakpoints.up('md'));
 
+  useEffect(() => {
+    getSparePartsListByName({ search: debouncedSearch });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debounceSearch = useCallback(
+    debounce(value => {
+      setDebouncedSearch(value);
+    }, 300),
+    [debounce]
+  );
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    watch
+    watch,
+    setValue
   } = useForm<FormFieldValues>({
     defaultValues: {
       mob: '',
       name: '',
       vehicle: '',
       vehicleNumber: '',
-      partInfo: [{ partName: '', qty: '', amount: '' }],
+      partInfo: [{ partId: '', partName: '', qty: '1', amount: '', availableQty: '', mrp: '' }],
       labour: ''
     }
   })
@@ -71,10 +89,14 @@ const BillForm: FC<BillFormProps> = (props) => {
   const partInfoWatchValue = watch('partInfo');
   const labourWatchValue = watch('labour');
 
-  const totalAmt =  partInfoWatchValue.reduce((acc, partDetails) => {
-      const amt = Number(partDetails.amount) || 0;
-      return acc + amt;
-    }, 0);
+  const totalAmt = partInfoWatchValue.reduce((acc, partDetails) => {
+    const amt = Number(partDetails.amount) || 0;
+    return acc + amt;
+  }, 0);
+
+  const handleAutoCompleteInputChange = (val: string) => {
+    debounceSearch(val);
+  }
 
   return (
     <>
@@ -144,17 +166,25 @@ const BillForm: FC<BillFormProps> = (props) => {
                   xs={12}
                   columnSpacing={match ? 6 : 1}
                   rowSpacing={match ? 6 : 3}>
-                  <Grid item={true} md={4} xs={12}>
-                    <TextField
-                      name={`partInfo.${index}.partName`}
-                      placeholder="Part Name"
+                  <Grid item={true} md={3} xs={12}>
+                    <AutocompleteDropdown
+                      name={`partInfo.${index}.partId`}
                       control={control}
                       errors={errors}
-                      testid="partname"
-                      isControlledField={true}
+                      options={spareData?.map((data) => ({ id: data.sku, name: data.name, ...data })) || []}
+                      placeholder='Part Name'
+                      onChangeHandler={(selectedValue) => {
+                        const qty = partInfoWatchValue.filter((_, ind) => index === ind)[0].qty || 0;
+                        const part = selectedValue as unknown as PartDetails;
+                        setValue(`partInfo.${index}.partName`, part?.name);
+                        setValue(`partInfo.${index}.availableQty`, part?.qty);
+                        setValue(`partInfo.${index}.mrp`, part?.mrp);
+                        setValue(`partInfo.${index}.amount`, `${Number(part?.mrp || 0) * Number(qty)}` || '');
+                      }}
+                      onInputChange={handleAutoCompleteInputChange}
                     />
                   </Grid>
-                  <Grid item={true} md={4} xs={12}>
+                  <Grid item={true} md={3} xs={12}>
                     <TextField
                       name={`partInfo.${index}.qty`}
                       placeholder="Quantity"
@@ -162,10 +192,28 @@ const BillForm: FC<BillFormProps> = (props) => {
                       errors={errors}
                       type="number"
                       testid="qty"
+                      onChange={(e) => {
+                        console.log(e.target.value);
+                        const qty = Number(e.target.value) || 0;
+                        const mrp = partInfoWatchValue.filter((_, ind) => index === ind)[0].mrp || 0;
+                        setValue(`partInfo.${index}.amount`, `${Number(mrp || 0) * qty}` || '');
+                      }}
                       isControlledField={true}
                     />
                   </Grid>
-                  <Grid item={true} md={4} xs={12}>
+                  <Grid item={true} md={3} xs={12}>
+                    <TextField
+                      name={`partInfo.${index}.mrp`}
+                      placeholder="MRP"
+                      control={control}
+                      errors={errors}
+                      type="number"
+                      testid="mrp"
+                      isControlledField={true}
+                      isDisabled={true}
+                    />
+                  </Grid>
+                  <Grid item={true} md={3} xs={12}>
                     <TextField
                       name={`partInfo.${index}.amount`}
                       placeholder="Amount"
@@ -187,7 +235,7 @@ const BillForm: FC<BillFormProps> = (props) => {
               className="py-[9px] mt-4 px-[17px] mb-2 w-full text-white bg-primaryColor md:w-auto"
               type="button"
               dataTestId="addpart"
-              onClick={() => append({ partName: '', qty: '', amount: '' })}
+              onClick={() => append({ partId: '', partName: '', qty: '1', amount: '', availableQty: '', mrp: '' })}
             />
             <div className='my-6 text-xl font-semibold w-full'>Labour Charge</div>
             <Grid
@@ -280,7 +328,7 @@ const BillForm: FC<BillFormProps> = (props) => {
                       <td className='pl-2 py-1'>{partId}</td>
                       <td className='py-1'>{info.partName}</td>
                       <td className='py-1'>{info.qty}</td>
-                      <td className='py-1'>18</td>
+                      <td className='py-1'>{info.mrp}</td>
                       <td className='py-1'>{info.amount}</td>
                     </tr>
                   )

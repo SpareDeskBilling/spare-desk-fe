@@ -10,3 +10,8 @@ export type ErrorObject = {
   message: string;
   details: string[];
 };
+
+export type OptionsLOVType = {
+  id: string;
+  name: string;
+};

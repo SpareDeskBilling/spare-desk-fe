@@ -22,4 +22,5 @@ export type CustomTextFieldProps = {
   startAdornment?: JSX.Element;
   showErrorMessage?: boolean;
   wrapperClass?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 };
